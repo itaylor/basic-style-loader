@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "insertionFn": { 
+      "instanceof": "Function"
+    },
+    "sourceMap": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic: scripts get added to head 1`] = `
+NodeList [
+  <style
+    id="existing-style"
+  >
+    .existing { color: yellow }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .required { color: blue }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+  </style>,
+]
+`;
+
+exports[`options: insertionFn gets passed styleObj and can use it to add attributes 1`] = `
+NodeList [
+  <style
+    id="existing-style"
+  >
+    .existing { color: yellow }
+  </style>,
+  <style
+    id="id___node_modules_css_loader_dist_cjs_js___fixtures_requiredOne_css"
+    type="text/css"
+  >
+    .required { color: blue }
+  </style>,
+  <style
+    id="id___node_modules_css_loader_dist_cjs_js___fixtures_requiredTwo_css"
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+  </style>,
+]
+`;
+
+exports[`options: insertionFn option allows tags to be placed elsewhere in the DOM 1`] = `
+NodeList [
+  <style
+    type="text/css"
+  >
+    .required { color: blue }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+  </style>,
+]
+`;
+
+exports[`options: sourceMap option adds inline sourceMaps if css-loader passes them 1`] = `
+NodeList [
+  <style
+    id="existing-style"
+  >
+    .existing { color: yellow }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .required { color: blue }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInJlcXVpcmVkT25lLmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxZQUFZLFlBQVkiLCJmaWxlIjoicmVxdWlyZWRPbmUuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnJlcXVpcmVkIHsgY29sb3I6IGJsdWUgfSJdfQ== */
+  </style>,
+  <style
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInJlcXVpcmVkVHdvLmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxlQUFlLFlBQVkiLCJmaWxlIjoicmVxdWlyZWRUd28uY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnJlcXVpcmVkVHdvIHsgY29sb3I6IGN5YW4gfSJdfQ== */
+  </style>,
+]
+`;
+
+exports[`options: sourceMap option wont add sourcemap if css-loader does not also 1`] = `
+NodeList [
+  <style
+    id="existing-style"
+  >
+    .existing { color: yellow }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .required { color: blue }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+  </style>,
+]
+`;
+
+exports[`options: sourceMap prevents sourcemap even if css-loader passes one 1`] = `
+NodeList [
+  <style
+    id="existing-style"
+  >
+    .existing { color: yellow }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .required { color: blue }
+  </style>,
+  <style
+    type="text/css"
+  >
+    .requiredTwo { color: cyan }
+  </style>,
+]
+`;
