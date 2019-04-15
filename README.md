@@ -1,69 +1,45 @@
-[![npm][npm]][npm-url]
-[![node][node]][node-url]
-[![deps][deps]][deps-url]
-[![chat][chat]][chat-url]
+# Basic Style Loader
+A webpack loader that adds Adds CSS to the DOM by injecting a `<style>` tag
 
-<div align="center">
-  <a href="https://github.com/webpack/webpack">
-    <img width="200" height="200"
-      src="https://webpack.js.org/assets/icon-square-big.svg">
-  </a>
-  <h1>Style Loader</h1>
-  <p>Adds CSS to the DOM by injecting a <code>&lt;style&gt;</code> tag</p>
-</div>
+## Why use this instead of the default [webpack-contrib/style-loader](https://github.com/webpack-contrib/style-loader)?
+The `webpack-contrib` `style-loader` handles a lot of use-cases with many complex and difficult to understand options.  A good portion of the code is workarounds to support old browsers.  Its behavior with regards to sourceMaps is difficult to understand and with `sourceMap: true` it causes a FOUC (flash of unstyled content) because it uses `<link>` tags instead of `<style>` tags. 
 
-<h2 align="center">Install</h2>
+This module sheds backward compatiblity with old browsers, and fixes problems with sourcemaps causing FOUCs by using inline sourcemaps inside the `<style>` tags.  This module seeks to be as simple as possible and is very little code.
 
+## Install
 ```bash
-npm install style-loader --save-dev
+npm install basic-style-loader --save-dev
 ```
 
-<h2 align="center">Usage</h2>
-
-It's recommended to combine `style-loader` with the [`css-loader`](https://github.com/webpack/css-loader)
+## Usage
+You will need to combine `basic-style-loader` with Webpack's [`css-loader`](https://github.com/webpack/css-loader) or another loader that works similarly. The CSS Loader is in charge of taking your css files and bundling them into your `.js` bundle file at compile time.  The Style Loader is in charge of inserting code so that at runtime, those css strings are inserted into the DOM of the page.
 
 **component.js**
-
 ```js
 import style from './file.css';
 ```
 
 **webpack.config.js**
-
 ```js
 {
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+        use: [{ loader: 'basic-style-loader' }, { loader: 'css-loader' }],
       },
     ];
   }
 }
 ```
 
-#### `Locals (CSS Modules)`
+## Options
 
-When using [local scoped CSS](https://github.com/webpack/css-loader#css-scope) the module exports the generated identifiers (locals).
+| Name               | Type          | Default          | Description                                           |
+| **`insertionFn`**  | `{Function}`  | `(styleTag) => document.head.appendChild(styleTag);`    | The function that does the actual insertion of `<style>` tags into the DOM.  You can provide your own function(styleTag, styleObj) here if you want to insert the styleTag somewhere other than the document head, or if you want to add additional attributes to it before it's inserted into the DOM |
+| **`sourceMap`**    | `{Boolean}`   | `false`          | Enable/Disable Sourcemaps *Note:* for sourcemaps to work, they must also be enabled in the previous loader (usually `css-loader`) |                                                                
 
-**component.js**
-
-```js
-import style from './file.css';
-
-style.className === 'z849f98ca812';
-```
-
-### `Url`
-
-It's also possible to add a URL `<link href="path/to/file.css" rel="stylesheet">` instead of inlining the CSS `{String}` with `<style></style>` tag.
-
-```js
-import url from 'file.css';
-```
-
-**webpack.config.js**
+Options are provided in the normal webpack fashion as an object in the loader object.  
 
 ```js
 {
@@ -71,413 +47,35 @@ import url from 'file.css';
     rules: [
       {
         test: /\.css$/,
-        use: [{ loader: 'style-loader/url' }, { loader: 'file-loader' }],
+        use: [{
+          loader: 'basic-style-loader',
+          options: {
+            sourceMap: true,
+            insertionFn: function (styleTag) {
+              //An example insertionFn that appends to the body instead of the head
+              document.body.appendChild(styleTag);
+            }
+          } 
+        }, {
+          loader: 'css-loader'
+          options: {
+            sourceMap: true,
+          }
+        }],
       },
     ];
   }
 }
 ```
 
-```html
-<link rel="stylesheet" href="path/to/file.css" />
-```
+## Credit where it's due
+This module was created largely by looking at the `style-loader` codebase and trying to understand and imagine what a simpler, stripped down version of it would be.
 
-> ℹ️ Source maps and assets referenced with `url`: when style loader is used with `{ options: { sourceMap: true } }` option, the CSS modules will be generated as `Blob`s, so relative paths don't work (they would be relative to `chrome:blob` or `chrome:devtools`). In order for assets to maintain correct paths setting `output.publicPath` property of webpack configuration must be set, so that absolute paths are generated. Alternatively you can enable the `convertToAbsoluteUrls` option mentioned above.
+## MIT LICENSE
+Copyright 2019 Ian Taylor
 
-### `Useable`
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The `style-loader` injects the styles lazily making them useable on-demand via `style.use()` / `style.unuse()`
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-By convention the `Reference Counter API` should be bound to `.useable.css` and the `.css` should be loaded with basic `style-loader` usage.(similar to other file types, i.e. `.useable.less` and `.less`).
-
-**webpack.config.js**
-
-```js
-{
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        exclude: /\.useable\.css$/,
-        use: [
-          { loader: "style-loader" },
-          { loader: "css-loader" },
-        ],
-      },
-      {
-        test: /\.useable\.css$/,
-        use: [
-          {
-            loader: "style-loader/useable"
-          },
-          { loader: "css-loader" },
-        ],
-      },
-    ],
-  },
-}
-```
-
-#### `Reference Counter API`
-
-**component.js**
-
-```js
-import style from './file.css';
-
-style.use(); // = style.ref();
-style.unuse(); // = style.unref();
-```
-
-Styles are not added on `import/require()`, but instead on call to `use`/`ref`. Styles are removed from page if `unuse`/`unref` is called exactly as often as `use`/`ref`.
-
-> ⚠️ Behavior is undefined when `unuse`/`unref` is called more often than `use`/`ref`. Don't do that.
-
-<h2 align="center">Options</h2>
-
-|            Name             |         Type         |   Default   | Description                                                                                                                    |
-| :-------------------------: | :------------------: | :---------: | :----------------------------------------------------------------------------------------------------------------------------- |
-|          **`hmr`**          |     `{Boolean}`      |   `true`    | Enable/disable Hot Module Replacement (HMR), if disabled no HMR Code will be added (good for non local development/production) |
-|         **`base`**          |      `{Number}`      |   `true`    | Set module ID base (DLLPlugin)                                                                                                 |
-|         **`attrs`**         |      `{Object}`      |    `{}`     | Add custom attrs to `<style></style>`                                                                                          |
-|       **`transform`**       |     `{Function}`     |   `false`   | Transform/Conditionally load CSS by passing a transform/condition function                                                     |
-|       **`insertAt`**        |  `{String\|Object}`  |  `bottom`   | Inserts `<style></style>` at the given position                                                                                |
-|      **`insertInto`**       | `{String\|Function}` |  `<head>`   | Inserts `<style></style>` into the given position                                                                              |
-|       **`singleton`**       |     `{Boolean}`      | `undefined` | Reuses a single `<style></style>` element, instead of adding/removing individual elements for each required module.            |
-|       **`sourceMap`**       |     `{Boolean}`      |   `false`   | Enable/Disable Sourcemaps                                                                                                      |
-| **`convertToAbsoluteUrls`** |     `{Boolean}`      |   `false`   | Converts relative URLs to absolute urls, when source maps are enabled                                                          |
-| **`insertionTag`** |     `{String}`      |   undefined   | Defines which of the three types of insertion tags to use.  Options are `'style'` to use `<style>` tags, `'link'` to use `<link>` tags or `singleton` to use a single `<style>` tag for all styles.  If left `undefined`, automatic resolution is used, which prefers `<style>` tags unless sourcemaps are used, when it instead prefers `<link>` tags.                                                            |
-### `hmr`
-
-Enable/disable Hot Module Replacement (HMR), if disabled no HMR Code will be added.
-This could be used for non local development and production.
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    hmr: false
-  }
-}
-```
-
-### `base`
-
-This setting is primarily used as a workaround for [css clashes](https://github.com/webpack-contrib/style-loader/issues/163) when using one or more [DllPlugin](https://robertknight.github.io/posts/webpack-dll-plugins/)'s. `base` allows you to prevent either the _app_'s css (or _DllPlugin2_'s css) from overwriting _DllPlugin1_'s css by specifying a css module id base which is greater than the range used by _DllPlugin1_ e.g.:
-
-**webpack.dll1.config.js**
-
-```js
-{
-  test: /\.css$/,
-  use: [
-    'style-loader',
-    'css-loader'
-  ]
-}
-```
-
-**webpack.dll2.config.js**
-
-```js
-{
-  test: /\.css$/,
-  use: [
-    { loader: 'style-loader', options: { base: 1000 } },
-    'css-loader'
-  ]
-}
-```
-
-**webpack.app.config.js**
-
-```
-{
-  test: /\.css$/,
-  use: [
-    { loader: 'style-loader', options: { base: 2000 } },
-    'css-loader'
-  ]
-}
-```
-
-### `attrs`
-
-If defined, style-loader will attach given attributes with their values on `<style>` / `<link>` element.
-
-**component.js**
-
-```js
-import style from './file.css';
-```
-
-**webpack.config.js**
-
-```js
-{
-  test: /\.css$/,
-  use: [
-    { loader: 'style-loader', options: { attrs: { id: 'id' } } }
-    { loader: 'css-loader' }
-  ]
-}
-```
-
-```html
-<style id="id"></style>
-```
-
-#### `Url`
-
-**component.js**
-
-```js
-import link from './file.css';
-```
-
-**webpack.config.js**
-
-```js
-{
-  test: /\.css$/,
-  use: [
-    { loader: 'style-loader/url', options: { attrs: { id: 'id' } } }
-    { loader: 'file-loader' }
-  ]
-}
-```
-
-### `transform`
-
-A `transform` is a function that can modify the css just before it is loaded into the page by the style-loader.
-This function will be called on the css that is about to be loaded and the return value of the function will be loaded into the page instead of the original css.
-If the return value of the `transform` function is falsy, the css will not be loaded into the page at all.
-
-> ⚠️ In case you are using ES Module syntax in `tranform.js` then, you **need to transpile** it or otherwise it will throw an `{Error}`.
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    transform: 'path/to/transform.js'
-  }
-}
-```
-
-**transform.js**
-
-```js
-module.exports = function(css) {
-  // Here we can change the original css
-  const transformed = css.replace('.classNameA', '.classNameB');
-
-  return transformed;
-};
-```
-
-#### `Conditional`
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    transform: 'path/to/conditional.js'
-  }
-}
-```
-
-**conditional.js**
-
-```js
-module.exports = function(css) {
-  // If the condition is matched load [and transform] the CSS
-  if (css.includes('something I want to check')) {
-    return css;
-  }
-  // If a falsy value is returned, the CSS won't be loaded
-  return false;
-};
-```
-
-### `insertAt`
-
-By default, the style-loader appends `<style>` elements to the end of the style target, which is the `<head>` tag of the page unless specified by `insertInto`. This will cause CSS created by the loader to take priority over CSS already present in the target. To insert style elements at the beginning of the target, set this query parameter to 'top', e.g
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    insertAt: 'top'
-  }
-}
-```
-
-A new `<style>` element can be inserted before a specific element by passing an object, e.g.
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    insertAt: {
-        before: '#id'
-    }
-  }
-}
-```
-
-### `insertInto`
-
-By default, the style-loader inserts the `<style>` elements into the `<head>` tag of the page. If you want the tags to be inserted somewhere else you can specify a CSS selector for that element here. If you target an [IFrame](https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement) make sure you have sufficient access rights, the styles will be injected into the content document head.
-
-You can also pass function to override default behavior and insert styles in your container, e.g
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    insertInto: () => document.querySelector("#root"),
-  }
-}
-```
-
-Using function you can insert the styles into a [ShadowRoot](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot), e.g
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    insertInto: () => document.querySelector("#root").shadowRoot,
-  }
-}
-```
-
-### `singleton`
-
-If defined, the style-loader will reuse a single `<style></style>` element, instead of adding/removing individual elements for each required module.
-
-> ℹ️ This option is on by default in IE9, which has strict limitations on the number of style tags allowed on a page. You can enable or disable it with the singleton option.
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    singleton: true
-  }
-}
-```
-
-### `sourceMap`
-
-Enable/Disable source map loading
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    sourceMap: true
-  }
-}
-```
-
-### `convertToAbsoluteUrls`
-
-If convertToAbsoluteUrls and sourceMaps are both enabled, relative urls will be converted to absolute urls right before the css is injected into the page. This resolves [an issue](https://github.com/webpack/style-loader/pull/96) where relative resources fail to load when source maps are enabled. You can enable it with the convertToAbsoluteUrls option.
-
-**webpack.config.js**
-
-```js
-{
-  loader: 'style-loader',
-  options: {
-    sourceMap: true,
-    convertToAbsoluteUrls: true
-  }
-}
-```
-
-<h2 align="center">Maintainers</h2>
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/bebraw">
-          <img width="150" height="150" src="https://github.com/bebraw.png?v=3&s=150">
-          </br>
-          Juho Vepsäläinen
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/d3viant0ne">
-          <img width="150" height="150" src="https://github.com/d3viant0ne.png?v=3&s=150">
-          </br>
-          Joshua Wiens
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/sapegin">
-          <img width="150" height="150" src="https://github.com/sapegin.png?v=3&s=150">
-          </br>
-          Artem Sapegin
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/michael-ciniawsky">
-          <img width="150" height="150" src="https://github.com/michael-ciniawsky.png?v=3&s=150">
-          </br>
-          Michael Ciniawsky
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/evilebottnawi">
-          <img width="150" height="150" src="https://github.com/evilebottnawi.png?v=3&s=150">
-          </br>
-          Alexander Krasnoyarov
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <a href="https://github.com/sokra">
-          <img width="150" height="150" src="https://github.com/sokra.png?v=3&s=150">
-          </br>
-          Tobias Koppers
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/SpaceK33z">
-          <img width="150" height="150" src="https://github.com/SpaceK33z.png?v=3&s=150">
-          </br>
-          Kees Kluskens
-        </a>
-      </td>
-    <tr>
-  <tbody>
-</table>
-
-[npm]: https://img.shields.io/npm/v/style-loader.svg
-[npm-url]: https://npmjs.com/package/style-loader
-[node]: https://img.shields.io/node/v/style-loader.svg
-[node-url]: https://nodejs.org
-[deps]: https://david-dm.org/webpack/style-loader.svg
-[deps-url]: https://david-dm.org/webpack/file-loader
-[chat]: https://badges.gitter.im/webpack/webpack.svg
-[chat-url]: https://gitter.im/webpack/webpack
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

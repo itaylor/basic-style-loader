@@ -9,7 +9,7 @@ module.exports = () => {};
 
 module.exports.pitch = function loader(request) {
   const options = loaderUtils.getOptions(this) || {};
-  validateOptions(schema, options, 'Simple Style Loader');
+  validateOptions(schema, options, 'Basic Style Loader');
   return [
     '',
     `var content = require(${loaderUtils.stringifyRequest(

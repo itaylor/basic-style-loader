@@ -1,9 +1,9 @@
 {
-  "name": "simple-style-loader",
+  "name": "basic-style-loader",
   "version": "1.0.0-rc.1",
-  "description": "A simple style loader module for webpack",
+  "description": "A basic, simple style loader module for webpack",
   "license": "MIT",
-  "repository": "itaylor/simple-style-loader",
+  "repository": "itaylor/basic-style-loader",
   "main": "index.js",
   "engines": {
     "node": ">= 8"

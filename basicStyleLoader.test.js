@@ -35,7 +35,7 @@ describe('', () => {
   });
   test('options: sourceMap option adds inline sourceMaps if css-loader passes them', async () => {
     const use = [{
-      loader: 'simple-style-loader', 
+      loader: 'basic-style-loader', 
       options: {
         sourceMap: true,
       }
@@ -53,7 +53,7 @@ describe('', () => {
   });
   test('options: sourceMap option wont add sourcemap if css-loader does not also', async () => {
     const use = [{
-      loader: 'simple-style-loader', 
+      loader: 'basic-style-loader', 
       options: {
         sourceMap: true,
       }
@@ -71,7 +71,7 @@ describe('', () => {
   });
   test('options: sourceMap prevents sourcemap even if css-loader passes one', async () => {
     const use = [{
-      loader: 'simple-style-loader', 
+      loader: 'basic-style-loader', 
       options: {
         sourceMap: false,
       }
@@ -89,7 +89,7 @@ describe('', () => {
   });
   test('options: insertionFn option allows tags to be placed elsewhere in the DOM', async () => {
     const use = [{
-      loader: 'simple-style-loader', 
+      loader: 'basic-style-loader', 
       options: {
         insertionFn: (styleTag) => {
           document.body.appendChild(styleTag);
@@ -106,7 +106,7 @@ describe('', () => {
   });
   test('options: insertionFn gets passed styleObj and can use it to add attributes', async () => {
     const use = [{
-      loader: 'simple-style-loader', 
+      loader: 'basic-style-loader', 
       options: {
         insertionFn: (styleTag, styleObj) => { 
           const idSafe = `id-${styleObj.id}`.replace(/[\W]/gi, '_');
@@ -152,7 +152,7 @@ function createWebpackCompiler(webpackConfig) {
     mode: 'development',
     resolveLoader: {
       alias: {
-        'simple-style-loader': path.resolve(__dirname),
+        'basic-style-loader': path.resolve(__dirname),
       },
     },
     plugins: [],
@@ -161,7 +161,7 @@ function createWebpackCompiler(webpackConfig) {
   return compiler;
 }
 
-function getWebpackConfig(use = ['simple-style-loader','css-loader']) {
+function getWebpackConfig(use = ['basic-style-loader','css-loader']) {
   const webpackConfig = {
     entry: `${fixturesDir}/main.js`,
     output: {
