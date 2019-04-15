@@ -36,7 +36,8 @@ import style from './file.css';
 ## Options
 
 | Name               | Type          | Default          | Description                                           |
-| **`insertionFn`**  | `{Function}`  | `(styleTag) => document.head.appendChild(styleTag);`    | The function that does the actual insertion of `<style>` tags into the DOM.  You can provide your own function(styleTag, styleObj) here if you want to insert the styleTag somewhere other than the document head, or if you want to add additional attributes to it before it's inserted into the DOM |
+| -----------------  | ------------- | ---------------- | ----------------------------------------------------- |
+| **`insertionFn`**  | `{Function}`  | `(styleTag) => document.head.appendChild(styleTag);`    | The function that does the actual insertion of `<style>` tags into the DOM.  You can provide your own `function (styleTag, styleObj)` here if you want to insert the styleTag somewhere other than the document head, or if you want to add additional attributes to it before it is inserted into the DOM |
 | **`sourceMap`**    | `{Boolean}`   | `false`          | Enable/Disable Sourcemaps *Note:* for sourcemaps to work, they must also be enabled in the previous loader (usually `css-loader`) |                                                                
 
 Options are provided in the normal webpack fashion as an object in the loader object.  
